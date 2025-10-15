@@ -1,10 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const app = express();
 const session = require('express-session');
 const bookRoutes = require('./routes/Book');//ของเพื่อน
-require('dotenv').config();
 
 
 // เชื่อมต่อ MongoDB
