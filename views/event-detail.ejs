@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= event.name %>
+    </title>
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+
+<body>
+    <%- include('partials/header') %>
+
+        <h1><%= event.name %></h1>
+        <div style="margin: auto; max-width: 500px; background-color: #333; padding: 20px; border-radius: 10px; color: white;">
+            <img src="<%= event.image %>" alt="<%= event.name %>" style="width:100%; height: auto; border-radius:5px;">
+            <p><strong>รายละเอียด:</strong>
+                <%= event.description %>
+            </p>
+            <p><strong>วันที่:</strong>
+                <%= new Date(event.date).toLocaleDateString() %>
+            </p>
+            <p><strong>สถานที่:</strong>
+                <%= event.location %>
+            </p>
+        </div>
+        
+        <!-- ✅ เลือกโซน -->
+        <% if (!currentUser || currentUser.role==='Attendee' ) { %>
+        <form action="/events/<%= event._id %>/book" method="POST">
+            <label for="zone"><strong>เลือกโซน:</strong></label>
+            <select name="zone" id="zone" required>
+                <% if (event.zones && event.zones.length> 0) { %>
+                    <% event.zones.forEach(zone=> { %>
+                        <option value="<%= zone.name %>">
+                            โซน <%= zone.name %> (ที่นั่งคงเหลือ: <%= zone.seats - (zone.bookedSeats ?zone.bookedSeats.length : 0) %>)
+                                    
+                        </option>
+                    <% }) %>
+                <% } else { %>
+                    <option disabled>ยังไม่มีโซนสำหรับอีเวนต์นี้</option>
+                <% } %>
+            </select>
+    
+            <label for="quantity">จำนวนที่นั่ง:</label>
+            <input type="number" name="quantity" id="quantity" placeholder="จำนวนที่นั่ง" style="width: 100px;" min="1" max="4"required>
+            <small>ซื้อได้สูงสุด 4 ที่นั่งต่อบัญชี</small>
+            <button type="submit" class="btn">ซื้อบัตร</button>
+            
+        </form>
+        <% } else if (event.ticketCount <=0) { %>
+            <!-- ถ้าบัตรหมด แสดง SOLD OUT -->
+            <div
+                style="margin-left: 20rem; background-color: red; width: 450px; text-align: center; padding: 10px; border-radius: 5px; color: white;">
+                SOLD OUT
+            </div>
+        <% } %>
+        <%- include('partials/footer') %>
+        <script>
+            const zoneSelect = document.getElementById('zone');
+            const quantityInput = document.getElementById('quantity');
+
+            function updateMax() {
+                const selectedOption = zoneSelect.selectedOptions[0];
+                quantityInput.max = selectedOption.dataset.max;
+                if (quantityInput.value > quantityInput.max) quantityInput.value = quantityInput.max;
+            }
+
+            // เรียกตอนโหลดหน้า
+            updateMax();
+
+            // เปลี่ยนโซนจะอัปเดต max
+            zoneSelect.addEventListener('change', updateMax);
+        </script>
+</body>
+
+</html>

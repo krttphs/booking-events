@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard ผู้จัดงาน</title>
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+<body>
+    <%- include('../partials/header') %>
+    <h1>Dashboard ผู้จัดงาน</h1>
+    <div class="container">
+        <% if (events.length> 0) { %>
+            <!-- <h2>รายการอีเวนต์ของฉัน</h2> -->
+            <div class="eventList">
+                <% events.forEach(event=> { %>
+                    <div class="eachEvent">
+                        
+                        <div class="eventHeader">
+                            <h4><%= event.name %></h4>
+                            <a href="/organizer/buyer-list/<%= event._id %>">ดูรายชื่อผู้ซื้อ</a>
+                        </div>
+                
+                        <div class="stats-div">
+                            <div class="stat-content">
+                                <h3>ยอดการจอง </h3>
+                                <div class="stat">
+                                    <p><%= event.stats.pending %><img class="bigIcon" src="https://cdn-icons-png.flaticon.com/512/33/33308.png"
+                                    alt="booking icon"></p>
+                                </div>
+                            </div>
+                            <div class="stat-content">
+                                <h3>บัตรที่ขายได้</h3>
+                                <div class="stat">
+                                    <p><%= event.stats.sold %> <img class="bigIcon" src="https://cdn-icons-png.flaticon.com/512/785/785581.png" alt="ticket icon"></p>
+                                </div>
+                            </div>
+                            <div class="stat-content">
+                                <h3>รายได้รวม</h3>
+                                <div class="stat">
+                                    <p><%= event.stats.revenue.toLocaleString() %><img class="bigIcon" src="https://cdn-icons-png.flaticon.com/512/3360/3360459.png" alt="wallet icon"></p>
+                                </div>
+                            </div>
+                        </div>
+                
+                        
+                    </div>
+                <% }); %>
+            </div>
+            
+        <% } else { %>
+            <p>คุณยังไม่มีอีเวนต์ที่สร้างขึ้น</p>
+        <% } %>
+    </div>
+    
+    
+    <%- include('../partials/footer') %>
+</body>
+</html>

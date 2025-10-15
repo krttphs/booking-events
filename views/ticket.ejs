@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ตั๋วของคุณ - <%= ticket.event.name %></title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .ticket {
+      display: flex;
+      flex-direction: row;
+      background: linear-gradient(135deg, #1e1e1e, #292929);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      width: 750px;
+      height: 430px;
+      position: relative;
+      border: 1px solid #444;
+    }
+
+    .ticket::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: -10px;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #121212;
+    }
+
+    .ticket::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -10px;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #121212;
+    }
+
+    .ticket-left {
+      flex: 2;
+      position: relative;
+      padding: 20px;
+      border-right: 2px dashed #666;
+    }
+
+    .ticket-left img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .ticket-info {
+      margin-top: 12px;
+    }
+
+    .ticket-info h2 {
+      margin: 0;
+      font-size: 22px;
+      color: #ffcc00;
+    }
+
+    .ticket-info p {
+      margin: 3px 0;
+      font-size: 15px;
+    }
+
+    .ticket-right {
+      flex: 1;
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .ticket-right img {
+      width: 150px;
+      height: 150px;
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .ticket-right small {
+      display: block;
+      color: #aaa;
+      margin-top: 8px;
+    }
+
+    .divider {
+      border-top: 1px solid #444;
+      margin: 10px 0;
+    }
+
+    .btn-back {
+      background: #ffcc00;
+      color: #000;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+
+    .btn-back:hover {
+      background: #e6b800;
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket">
+    <div class="ticket-left">
+      <img src="<%= ticket.event.image %>" alt="<%= ticket.event.name %>">
+      <div class="ticket-info">
+        <h2><%= ticket.event.name %></h2>
+        <p><strong>สถานที่:</strong> <%= ticket.event.location %></p>
+        <p><strong>วันที่:</strong> <%= new Date(ticket.event.date).toLocaleDateString('th-TH', { day:'2-digit', month:'long', year:'numeric'}) %></p>
+        <div class="divider"></div>
+        <p><strong>โซน:</strong> <%= ticket.zone %></p>
+        <p><strong>ที่นั่ง:</strong> <%= ticket.seats.join(', ') %></p>
+        <p><strong>ราคา:</strong> <%= ticket.totalPrice.toLocaleString() %> บาท</p>
+        <p><strong>สถานะ:</strong> 
+          <% if (ticket.status === 'confirmed') { %>
+            <span style="color: #4CAF50;">ยืนยันแล้ว</span>
+          <% } else { %>
+            <span style="color: #ff4444;">รอดำเนินการ</span>
+          <% } %>
+        </p>
+      </div>
+    </div>
+
+    <div class="ticket-right">
+      <img src="<%= ticket.qrCode %>" alt="QR Code">
+      <small>สแกนเพื่อยืนยันตั๋ว</small>
+      <small>Ticket ID: <%= ticket._id.toString().slice(-6).toUpperCase() %></small>
+    </div>
+  </div>
+
+  <div style="text-align:center;">
+    <a href="/events/history" class="btn-back">ย้อนกลับไปยังประวัติการซื้อ</a>
+  </div>
+</body>
+</html>

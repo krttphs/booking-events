@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Event Ticketing</title>
+  <link href="/style.css" rel="stylesheet">
+</head>
+
+<body>
+  <%- include('partials/header') %>
+
+    <h1>รายการอีเวนต์ทั้งหมด</h1>
+    <div class="event-list">
+      <% if (events.length> 0) { %>
+        <% events.forEach(event=> { %>
+          <div class="event-card" onclick="goToEventDetail('<%= event._id %>')" style="cursor: pointer;">
+            <img src="<%= event.image %>" alt="<%= event.name %>">
+            <h2>
+              <%= event.name %>
+            </h2>
+            <p>วันที่: <%= new Date(event.date).toLocaleDateString() %>
+            </p>
+            
+            <p class="countdown" data-date="<%= event.date %>"></p>
+          </div>
+          <% }); %>
+            <% } else { %>
+              <p>ยังไม่มีอีเวนต์ที่เปิดขายบัตร</p>
+              <% } %>
+    </div>
+
+    <%- include('partials/footer') %>
+      <script>
+        function goToEventDetail(eventId) {
+          window.location.href = `/events/${eventId}`;
+        }
+
+        // ฟังก์ชันสำหรับแสดง countdown
+        function startCountdown() {
+          const countdownEls = document.querySelectorAll('.countdown');
+
+          countdownEls.forEach(el => {
+            const targetDate = new Date(el.getAttribute('data-date')).getTime();
+
+            function updateCountdown() {
+              const now = new Date().getTime();
+              const diff = targetDate - now;
+
+              if (diff <= 0) {
+                el.textContent = "งานเริ่มแล้ว!";
+                el.style.background = "red"
+                return;
+              }
+
+              const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+              const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+              el.style.background = "green"
+              el.textContent = `เหลืออีก ${days} วัน ${hours} ชม. ${minutes} นาที ${seconds} วินาที`;
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+          });
+        }
+
+        startCountdown();
+      </script>
+</body>
+
+</html>

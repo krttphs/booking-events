@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= event ? 'แก้ไขอีเวนต์' : 'สร้างอีเวนต์ใหม่' %></title>
+    <!-- ถ้ามีข้อมูลอีเวนต์ให้เป็นโหมดแก้ไข ถ้าไม่มี=สร้างใหม่-->
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    <div class="backBtn">
+        <button onclick="window.location.href='/organizer/manage-event'"> &larr; กลับ</button>
+    </div>
+    <div class="container">
+
+        <h1><%= event ? 'แก้ไขอีเวนต์' : 'สร้างอีเวนต์ใหม่' %></h1>
+        <form action="<%= event ? '/organizer/edit-event/'+ event._id : '/organizer/create-event' %>" method="POST">
+            <!-- ชื่อ -->
+            <label>ชื่ออีเวนต์:</label>
+            <input type="text" name="name" value="<%= event ? event.name : '' %>" required>
+
+            <!-- รายละเอียด -->
+            <label>รายละเอียด:</label>
+            <textarea name="description" required><%= event ? event.description : '' %></textarea>
+
+            <!-- รูปภาพ -->
+            <label>รูปโปสเตอร์ (URL):</label>
+            <input type="text" name="image" value="<%= event ? event.image : '' %>" required>
+
+            <!-- วันเวลา -->
+            <label>วันจัดงาน:</label>
+            <input type="date" name="date" value="<%= event ? new Date(event.date).toISOString().split('T')[0] : '' %>" required>
+
+            <!-- เวลาเริ่มโชว์ -->
+            <label>เวลาเริ่มการแสดง:</label>
+            <input type="time" name="showStart" value="<%= event ? event.showStart : '' %>" required>
+
+            <!-- สถานที่ -->
+            <label>สถานที่:</label>
+            <input type="text" name="location" value="<%= event ? event.location : '' %>" required>
+
+
+            <h3>โซนที่นั่ง</h3>
+            <!-- แสดงโซนที่มีอยู่แล้ว (ถ้าเป็นโหมดแก้ไข) -->
+            <% // สำหรับโหมดแก้ไข ใช้ zones เดิม, ถ้าไม่มี (สร้างใหม่) ใช้ default zone 
+                const zonesToRender=(event && event.zones &&
+                event.zones.length> 0)
+                ? event.zones
+                : [{ name:'', seats:'', price:'', type:'Seated' }];
+            %>
+
+            <% zonesToRender.forEach((zone, i)=> { %>
+                <div class="zone">
+                    <div class="delZoneBtn">
+                        <button type="button" onclick="removeZone(this)">ลบ</button>
+                    </div>
+            
+                    <label>ชื่อโซน:</label>
+                    <input type="text" name="zones[<%= i %>][name]" value="<%= zone.name %>" placeholder="เช่น A, B, VIP" required>
+            
+                    <label>จำนวนที่นั่ง:</label>
+                    <input type="number" name="zones[<%= i %>][seats]" value="<%= zone.seats %>" placeholder="เช่น 100" required>
+            
+                    <label>ราคาบัตร(บาท):</label>
+                    <input type="number" name="zones[<%= i %>][price]" min="0" value="<%= zone.price %>" placeholder="เช่น 500"
+                        required>
+            
+                    <label>ประเภทตั๋ว:</label>
+                    <select name="zones[<%= i %>][type]" required>
+                        <option value="Seated" <%=zone.type==='Seated' ? 'selected' : '' %>>Seated</option>
+                        <option value="Standing" <%=zone.type==='Standing' ? 'selected' : '' %>>Standing</option>
+                    </select>
+                </div>
+            <% }) %>
+
+            <div id="zonesContainer"></div>
+            <div class="formChoice">
+                <button type="button" onclick="addZone()">+ เพิ่มโซน</button>
+                <button type="submit">
+                    <%= event ? 'บันทึกการแก้ไข' : 'สร้างอีเวนต์' %>
+                </button>
+            </div>
+            
+        </form>
+    </div>
+    
+    <%- include('../partials/footer') %>
+    <script>
+        // zoneIndex เริ่มจากจำนวนโซนที่เราสร้างใน DOM
+        let zoneIndex = <%= zonesToRender.length %>;
+
+        function addZone() {
+            const container = document.getElementById('zonesContainer');
+            const zoneDiv = document.createElement('div');
+            zoneDiv.className = 'zone';
+            zoneDiv.innerHTML = `
+                <div class="delZoneBtn">
+                    <button type="button" onclick="removeZone(this)">ลบ</button>
+                </div>
+                <label>ชื่อโซน:</label>
+                <input type="text" name="zones[${zoneIndex}][name]" placeholder="เช่น A, B, VIP" required>
+
+                <label>จำนวนที่นั่ง:</label>
+                <input type="number" name="zones[${zoneIndex}][seats]" placeholder="เช่น 100" required>
+
+                <label>ราคาบัตร(บาท):</label>
+                <input type="number" name="zones[${zoneIndex}][price]" min="0" placeholder="เช่น 500" required>
+
+                <label>ประเภทตั๋ว:</label>
+                <select name="zones[${zoneIndex}][type]" required>
+                    <option value="Seated" selected>Seated</option>
+                    <option value="Standing">Standing</option>
+                </select>
+            `;
+            container.appendChild(zoneDiv);
+            zoneIndex++;
+        }
+
+        function removeZone(button) {
+            const zoneDiv = button.closest('.zone');
+            if (zoneDiv) {
+                zoneDiv.remove();
+            }
+        }
+    </script>
+</body>
+</html>

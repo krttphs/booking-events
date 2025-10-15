@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= user && user.firstName ? 'แก้ไขโปรไฟล์' : 'กรอกโปรไฟล์' %>
+    </title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+        <h1>
+            <%= user && user.firstName ? 'แก้ไขโปรไฟล์ของฉัน' : 'กรอกโปรไฟล์ของฉัน' %>
+        </h1>
+
+        <form action="/attendee/profile" method="POST">
+            <label>ชื่อ:</label>
+            <input type="text" name="firstName" value="<%= user && user.firstName ? user.firstName : '' %>" required>
+
+            <label>นามสกุล:</label>
+            <input type="text" name="lastName" value="<%= user && user.lastName ? user.lastName : '' %>" required>
+
+            <label>อีเมล:</label>
+            <input type="email" name="email" value="<%= user && user.email ? user.email : '' %>" required>
+
+            <label>เบอร์โทร:</label>
+            <input type="tel" name="tel" value="<%= user && user.tel ? user.tel : '' %>" required pattern="[0-9]{9,10}"
+                title="กรอกเบอร์โทร 9-10 หลัก">
+
+            <button type="submit">
+                <%= user && user.firstName ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล' %>
+            </button>
+        </form>
+
+        <%- include('../partials/footer') %>
+</body>
+
+</html>

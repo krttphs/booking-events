@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>เข้าสู่ระบบ</title>
+        <link rel="stylesheet" href="/style.css">
+
+</head>
+<body>
+    <%- include('partials/header') %>
+    
+    <h1>เข้าสู่ระบบ</h1>
+    <form action="/auth/login" method="POST">
+        <label for="username">ชื่อผู้ใช้:</label>
+        <input type="text" id="username" name="username" required><br>
+        
+        <label for="password">รหัสผ่าน:</label>
+        <input type="password" id="password" name="password" required><br>
+        
+        <div class="formChoice">
+            <a href="/auth/register">สมัครสมาชิก</a><button type="submit">เข้าสู่ระบบ</button>
+        </div>
+        
+    </form>
+    
+    
+    
+    <%- include('partials/footer') %>
+</body>
+</html>

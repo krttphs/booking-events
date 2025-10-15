@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>สมัครสมาชิก</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    
+    <h1>สมัครสมาชิก</h1>
+    <form action="/auth/register" method="POST">
+        <label for="username">ชื่อผู้ใช้:</label>
+        <input type="text" id="username" name="username" required><br>
+        
+        <label for="password">รหัสผ่าน:</label>
+        <input type="password" id="password" name="password" required><br>
+
+        <label for="firstName">ชื่อ:</label>
+        <input type="text" name="firstName" required>
+
+        <label for="lastName">นามสกุล:</label>
+        <input type="text" name="lastName" required>
+
+        <label for="email">อีเมล:</label>
+        <input type="email" name="email" required>
+
+        <label for="tel">เบอร์โทร:</label>
+        <input type="tel" name="tel" required>
+
+        
+        <!-- เอาออก
+        <label for="role">บทบาท:</label>
+        <select id="role" name="role">
+            <option value="Attendee">ผู้เข้าร่วม (Attendee)</option>
+            <option value="Organizer">ผู้จัดงาน (Organizer)</option>
+        </select><br> -->
+
+        <div class="formChoice">
+            <a href="/auth/login">เข้าสู่ระบบ</a><button type="submit">สมัครสมาชิก</button>
+        </div>
+        
+    </form>
+    
+    
+    
+    <%- include('partials/footer') %>
+</body>
+</html>
