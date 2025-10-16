@@ -14,7 +14,8 @@ exports.register = async (req, res) => {
             firstName,
             lastName,
             email,
-            tel
+            tel,
+            coin: 0
         });
         
         await newUser.save();

@@ -37,9 +37,9 @@ exports.bookTicket = async (req, res) => {
 
         const eventId = req.params.id;
         const selectedZone = req.body.zone; // ✅ รับค่าจาก form
-        // const quantity = parseInt(req.body.quantity);
-        // if (!quantity || quantity <= 0) return res.status(400).send('กรุณาเลือกจำนวนที่นั่งที่ถูกต้อง');
-        
+        const quantity = parseInt(req.body.quantity);
+        if (!quantity || quantity <= 0) return res.status(400).send('กรุณาเลือกจำนวนที่นั่งที่ถูกต้อง');
+
         const event = await Event.findById(eventId);
         if (!event) {
             return res.status(404).send('Event not found.');
@@ -72,6 +72,22 @@ exports.bookTicket = async (req, res) => {
             return res.status(400).send(`โซน ${selectedZone} มีที่นั่งคงเหลือ ${availableSeats} ที่`);
         }
 
+        const remainingSeats = zone.seats - zone.bookedSeats.length;
+        if (quantity > remainingSeats) 
+        return res.status(400).send(`จำนวนที่นั่งเกินโควต้า! คงเหลือ: ${remainingSeats}`);
+
+        const totalPrice = zone.price * quantity;
+        
+        const user = await User.findById(req.session.user._id);
+
+        // ตรวจสอบ coin
+        if (user.coin < totalPrice) {
+            return res.redirect('/coin');
+        }
+
+        // ลด coin และบันทึก
+        user.coin -= totalPrice;
+
         // สร้างเลขที่นั่งหลายที่
         const seatNumbers = [];
         for (let i = 0; i < numSeats; i++) {
@@ -83,9 +99,8 @@ exports.bookTicket = async (req, res) => {
         // ลดจำนวน ticketCount ของ event
         // event.ticketCount = Math.max(event.ticketCount - numSeats, 0);//ลดได้ไม่เกิน0
         await event.save();
-
+        req.session.user.coin = user.coin;
         // เพิ่มประวัติการซื้อบัตรใน user
-        const user = await User.findById(req.session.user._id);
         if (!Array.isArray(user.ticketHistory)) {
             user.ticketHistory = [];
         }
@@ -113,7 +128,7 @@ exports.bookTicket = async (req, res) => {
         booking.qrCode = qrData;
         await booking.save();
         console.log('Generated Ticket URL:', ticketUrl);
-        
+
         // --- จุดแก้ไขที่ 5 (แก้ไข Redirect) ---
         // ใส่ / ข้างหน้าเพื่อให้เป็น absolute path
         res.redirect('/events/history');

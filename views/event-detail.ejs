@@ -1,19 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 
 <head>
+    <meta charset="UTF-8">
     <title>
         <%= event.name %>
     </title>
     <link rel="stylesheet" href="/style.css">
-
 </head>
 
 <body>
     <%- include('partials/header') %>
 
-        <h1><%= event.name %></h1>
-        <div style="margin: auto; max-width: 500px; background-color: #333; padding: 20px; border-radius: 10px; color: white;">
+        <h1>
+            <%= event.name %>
+        </h1>
+        <div
+            style="margin: auto; max-width: 500px; background-color: #333; padding: 20px; border-radius: 10px; color: white;">
             <img src="<%= event.image %>" alt="<%= event.name %>" style="width:100%; height: auto; border-radius:5px;">
             <p><strong>รายละเอียด:</strong>
                 <%= event.description %>
@@ -26,53 +29,115 @@
             </p>
         </div>
         
-        <!-- ✅ เลือกโซน -->
         <% if (!currentUser || currentUser.role==='Attendee' ) { %>
-        <form action="/events/<%= event._id %>/book" method="POST">
-            <label for="zone"><strong>เลือกโซน:</strong></label>
-            <select name="zone" id="zone" required>
-                <% if (event.zones && event.zones.length> 0) { %>
-                    <% event.zones.forEach(zone=> { %>
-                        <option value="<%= zone.name %>">
-                            โซน <%= zone.name %> (ที่นั่งคงเหลือ: <%= zone.seats - (zone.bookedSeats ?zone.bookedSeats.length : 0) %>)
-                                    
+            <form id="bookingForm" action="/events/<%= event._id %>/book" method="POST" style="margin-top:20px;">
+                <label for="zone"><strong>เลือกโซน:</strong></label>
+                <select name="zone" id="zone" required>
+                    <% event.zones.forEach(zone=> {
+                        const remaining = zone.seats - (zone.bookedSeats?.length || 0);
+                        %>
+                        <option value="<%= zone.name %>" data-price="<%= zone.price %>" data-max="<%= remaining %>">
+                            โซน <%= zone.name %> (ที่นั่งคงเหลือ: <%= remaining %>)
                         </option>
-                    <% }) %>
-                <% } else { %>
-                    <option disabled>ยังไม่มีโซนสำหรับอีเวนต์นี้</option>
-                <% } %>
-            </select>
-    
-            <label for="quantity">จำนวนที่นั่ง:</label>
-            <input type="number" name="quantity" id="quantity" placeholder="จำนวนที่นั่ง" style="width: 100px;" min="1" max="4"required>
-            <small>ซื้อได้สูงสุด 4 ที่นั่งต่อบัญชี</small>
-            <button type="submit" class="btn">ซื้อบัตร</button>
-            
-        </form>
-        <% } else if (event.ticketCount <=0) { %>
-            <!-- ถ้าบัตรหมด แสดง SOLD OUT -->
-            <div
-                style="margin-left: 20rem; background-color: red; width: 450px; text-align: center; padding: 10px; border-radius: 5px; color: white;">
-                SOLD OUT
+                        <% }) %>
+                </select>
+
+                <label for="quantity">จำนวนที่นั่ง:</label>
+                <input type="number" name="quantity" id="quantity" min="1" max="4" required>
+                <small>สามารถจองสูงสุด4</small>
+
+                <button type="button" class="btn" id="confirmBtn">ซื้อบัตร</button>
+            </form>
+
+            <!-- Modal -->
+            <div id="confirmModal" style="
+    display:none;
+    position:fixed;
+    top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    justify-content:center; align-items:center;
+">
+                <div
+                    style="background:white; padding:20px; border-radius:10px; max-width:400px; width:90%; text-align:center;">
+                    <h3>ยืนยันการจอง</h3>
+                    <p id="modalText"></p>
+                    <div style="display: flex;">
+                        <button id="modalCancel" class="btn" style="background:#ccc;">ยกเลิก</button>
+                        <button id="modalConfirm" class="btn">ยืนยัน</button>
+                    </div>
+
+                </div>
             </div>
-        <% } %>
-        <%- include('partials/footer') %>
-        <script>
-            const zoneSelect = document.getElementById('zone');
-            const quantityInput = document.getElementById('quantity');
 
-            function updateMax() {
-                const selectedOption = zoneSelect.selectedOptions[0];
-                quantityInput.max = selectedOption.dataset.max;
-                if (quantityInput.value > quantityInput.max) quantityInput.value = quantityInput.max;
-            }
+            <script>
+                const zoneSelect = document.getElementById('zone');
+                const quantityInput = document.getElementById('quantity');
+                const confirmBtn = document.getElementById('confirmBtn');
+                const modal = document.getElementById('confirmModal');
+                const modalText = document.getElementById('modalText');
+                const modalConfirm = document.getElementById('modalConfirm');
+                const modalCancel = document.getElementById('modalCancel');
+                const bookingForm = document.getElementById('bookingForm');
 
-            // เรียกตอนโหลดหน้า
-            updateMax();
+                function updateMax() {
+                    const selectedOption = zoneSelect.selectedOptions[0];
+                    quantityInput.max = selectedOption.dataset.max;
+                    if (quantityInput.value > quantityInput.max);
+                }
 
-            // เปลี่ยนโซนจะอัปเดต max
-            zoneSelect.addEventListener('change', updateMax);
-        </script>
+                // เรียกตอนโหลดหน้า
+                updateMax();
+                zoneSelect.addEventListener('change', updateMax);
+
+                // กดปุ่มซื้อ → แสดง modal
+                confirmBtn.addEventListener('click', () => {
+    const zone = zoneSelect.value;
+    let quantity = parseInt(quantityInput.value);
+    const remaining = parseInt(zoneSelect.selectedOptions[0].dataset.max);
+    const price = parseInt(zoneSelect.selectedOptions[0].dataset.price);
+    const total = quantity * price;
+
+    // ตรวจสอบจำนวนที่นั่ง
+    if (!quantity || quantity <= 0) {
+        alert("กรุณากรอกจำนวนที่นั่งก่อนค่ะ 🪑");
+        quantityInput.focus();
+        return;
+    }
+
+    if (quantity > remaining) {
+        alert(`จำนวนที่นั่งเกินโควต้าที่เหลือ! สามารถจองได้สูงสุด ${remaining} ที่นั่ง`);
+        quantityInput.value = remaining;
+        return;
+    }
+
+    if (quantity > 4) {
+        alert(`จำนวนที่นั่งสูงสุดต่อการจองคือ 4`);
+        quantityInput.value = 4;
+        return;
+    }
+
+    modalText.innerHTML = `คุณต้องการจอง <strong>${quantity}</strong> ที่นั่งในโซน <strong>${zone}</strong><br>ราคารวม: <strong>${total}</strong> บาท?`;
+    modal.style.display = 'flex';
+});
+
+                // ยืนยันใน modal → ส่ง form
+                modalConfirm.addEventListener('click', () => {
+                    bookingForm.submit();
+                });
+
+                // ยกเลิกใน modal → ปิด modal
+                modalCancel.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                });
+
+                // คลิกข้างนอก modal → ปิด modal
+                window.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.style.display = 'none';
+                });
+            </script>
+            <% } %>
+
+                <%- include('partials/footer') %>
 </body>
 
 </html>

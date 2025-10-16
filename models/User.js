@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true, },
   email: { type: String, required: true, },
   tel: { type: String, required: true, },
+  coin : { type: Number, default: 0 },
 
   /*-------------เพิ่ม ticketHistory ----------*/
   ticketHistory: [
