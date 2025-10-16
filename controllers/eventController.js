@@ -4,6 +4,107 @@ const User = require('../models/User');
 const Booking = require('../models/Bookings');//ของเพื่อน
 const QRCode = require('qrcode');
 
+exports.getEvents = async (req, res) => {
+  try {
+    const {
+      q,                 // คำค้นหา (ชื่อ/รายละเอียด/สถานที่)
+      location,          // สถานที่
+      start, end,        // ช่วงวัน: YYYY-MM-DD หรือ datetime-local
+      minPrice, maxPrice,// ช่วงราคา
+      available,         // '1' = เหลือบัตร
+      upcoming,          // '1' = เฉพาะอนาคต
+      sort,              // 'date_asc' | 'date_desc' | 'price_asc' | 'price_desc'
+      page = 1,          // เพจ
+      limit = 9          // ต่อหน้า
+    } = req.query;
+
+    const filter = {};
+
+    // ค้นหาข้อความ (ชื่อ/รายละเอียด/สถานที่)
+    if (q && q.trim()) {
+      const term = q.trim();
+      filter.$or = [
+        { name:       { $regex: term, $options: 'i' } },
+        { description:{ $regex: term, $options: 'i' } },
+        { location:   { $regex: term, $options: 'i' } },
+      ];
+    }
+
+    // กรองสถานที่
+    if (location && location.trim()) {
+      filter.location = { $regex: location.trim(), $options: 'i' };
+    }
+
+    // กรองช่วงวันที่
+    if (start || end) {
+      filter.date = {};
+      if (start) filter.date.$gte = new Date(start);
+      if (end)   filter.date.$lte = new Date(end);
+    }
+
+    // เฉพาะอนาคต
+    if (upcoming === '1') {
+      filter.date = { ...(filter.date || {}), $gte: new Date() };
+    }
+
+    // ช่วงราคา
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    // เหลือบัตร (กรณีคุณยังใช้ ticketCount เป็นคงเหลือ)
+    if (available === '1') {
+      filter.ticketCount = { $gt: 0 };
+    }
+
+    // เรียงลำดับ
+    const sortMap = {
+      date_asc:  { date: 1 },
+      date_desc: { date: -1 },
+      price_asc: { price: 1 },
+      price_desc:{ price: -1 },
+    };
+    const sortStage = sortMap[sort] || { date: 1 };
+
+    // เพจ/ลิมิต
+    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+    const perPage = Math.min(Math.max(parseInt(limit, 10) || 9, 1), 48);
+    const skip = (pageNum - 1) * perPage;
+
+    // คิวรี
+    const [items, total] = await Promise.all([
+      Event.find(filter).sort(sortStage).skip(skip).limit(perPage).lean(),
+      Event.countDocuments(filter)
+    ]);
+
+    const totalPages = Math.max(Math.ceil(total / perPage), 1);
+
+    return res.render('events/list', {
+      pageTitle: 'อีเวนต์ทั้งหมด',
+      events: items,
+      // ส่งค่าฟอร์มกลับไปเพื่อคง state
+      q: q || '',
+      location: location || '',
+      start: start || '',
+      end: end || '',
+      minPrice: minPrice || '',
+      maxPrice: maxPrice || '',
+      available: available || '',
+      upcoming: upcoming || '',
+      sort: sort || 'date_asc',
+      page: pageNum,
+      totalPages,
+      limit: perPage,
+      total
+    });
+  } catch (err) {
+    console.error('[getEvents filter]', err);
+    return res.status(500).send('โหลดรายการอีเวนต์ไม่สำเร็จ');
+  }
+};
+
 exports.getAllEvents = async (req, res) => {
     try {
         const events = await Event.find();
