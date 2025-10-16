@@ -1,0 +1,23 @@
+<header>
+  <nav>
+    <a href="/">หน้าแรก</a>
+    <a href="/events">รายการอีเวนต์</a>
+    <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+      <% if (currentUser.role === 'Attendee') { %>
+        <a href="/events/history">ประวัติการซื้อบัตร</a>
+        <a href="/attendee/profile">โปรไฟล์</a>
+        <a href="/auth/logout">ออกจากระบบ</a>
+        <a href="/coin" style="color: gold;">Coins: <span id="headerCoin"><%= coins %></span></a>
+      <% } else if (currentUser.role === 'Organizer') { %>
+        <a href="/organizer/dashboard">Dashboard</a>
+        <a href="/organizer/manage-event">จัดการอีเวนต์</a>
+        <a href="/auth/logout">ออกจากระบบ</a>
+        <% } %>
+      
+    <% } else { %>
+      <a href="/auth/login">เข้าสู่ระบบ</a>
+      <a href="/auth/register">สมัครสมาชิก</a>
+    <% } %>
+  </nav>
+      <link rel="stylesheet" href="/style.css">
+</header>

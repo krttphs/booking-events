@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>จัดการอีเวนท์</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    <div class="container">
+        <h1>จัดการอีเวนต์</h1>
+        
+        
+        <div class="eventList">
+            <div class="manageHeader">
+                <h4>รายการอีเวนต์ทั้งหมดของคุณ</h4>
+                <button onclick="window.location.href='/organizer/create-event'">+เพิ่มอีเวนต์ใหม่</button>
+            </div>
+            <% if (events.length> 0) { %>
+                <% events.forEach(event=> { %>
+                    <div class="eachEvent">
+                        <!-- <div class="evnt1">
+                            <p>ขายแล้ว <%= event.stats?.soldTickets || 0 %></p>
+                        </div> -->
+                        <div class="evnt2">
+                            <div class="eventPic">
+                                <img src="<%= event.image %>" alt="event poster">
+                            </div>
+                            <div class="eventDetail">
+                                <!-- <div id="evntStatus" style="background-color: <%= event.stats?.soldOut ? 'red' : '#28a745' %>;">
+                                    <%= event.stats?.soldOut ? 'SOLD OUT' : 'ON SALE' %>
+                                </div> -->
+                                <p id="evntName">
+                                    <%= event.name %>
+                                </p>
+                                <p><img class="icon" src="https://icons.veryicon.com/png/o/miscellaneous/face-monochrome-icon/calendar-249.png"
+                                        alt="calendar icon">
+                                    <%= new Date(event.date).toLocaleDateString("th-TH") %>
+                                </p>
+                                <p><img class="icon" src="https://www.iconpacks.net/icons/2/free-location-icon-2952-thumb.png" alt="location icon">
+                                    <%= event.location %>
+                                </p>
+                                <p><img class="icon" src="https://cdn-icons-png.flaticon.com/512/785/785581.png" alt="ticket icon">
+                                    <%= event.zones.map(z=> z.price.toLocaleString()).join(' / ') %> บาท
+                                </p>
+                            </div>
+                        </div>
+                        <div class="evnt3">
+                            <button onclick="confirmDelete('<%= event._id %>')" id="deleteBtn">ลบ</button>
+                            <button onclick="window.location.href='/organizer/edit-event/<%= event._id %>'" id="editBtn">แก้ไข</button>
+                        </div>
+                    </div>
+                <% }); %>
+                
+
+            <% } else { %>
+                <p>คุณยังไม่มีอีเวนต์ที่สร้างขึ้น</p>
+            <% } %>
+        </div>
+    </div>
+    <%- include('../partials/footer') %>
+    <script>
+        async function confirmDelete(eventId) {
+            const confirmed = confirm("คุณแน่ใจว่าต้องการลบอีเวนต์นี้หรือไม่?");
+            if (confirmed) {
+                try {
+                    const res = await fetch(`/organizer/delete-event/${eventId}`, {
+                        method: 'POST'
+                    });
+                    if (res.ok) {
+                        // ลบสำเร็จ → รีโหลดหน้า
+                        window.location.reload();
+                        alert("ลบอีเวนต์สำเร็จ");
+                    } else {
+                        alert("เกิดข้อผิดพลาดในการลบอีเวนต์");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("เกิดข้อผิดพลาดในการลบอีเวนต์");
+                }
+            }
+        }
+    </script>
+</body>
+</html>

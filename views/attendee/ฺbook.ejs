@@ -1,0 +1,13 @@
+<!-- -----------ของเพื่อน------------------ -->
+<%- include('partials/header') %>
+<main class="event-list">
+  <% events.forEach(event => { %>
+    <div class="event-card">
+      <img src="<%= event.image %>" alt="<%= event.name %>">
+      <h2><%= event.name %></h2>
+      <p><%= event.description.substring(0, 100) %>...</p>
+      <a href="/events/<%= event._id %>" class="btn">ดูรายละเอียด</a>
+    </div>
+  <% }) %>
+</main>
+<%- include('partials/footer') %>

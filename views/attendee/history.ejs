@@ -1,0 +1,116 @@
+<!-- -----------ของเพื่อน------------------ -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ประวัติการซื้อบัตร</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        table {
+            width: 80%;
+            margin: 2rem auto;
+            border-collapse: collapse;
+            background: #333;
+            color: #fff;
+            border-radius: 8px;
+            overflow: auto;
+        }
+
+        th,
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #444;
+            text-align: left;
+        }
+
+        th {
+            background: #222;
+        }
+
+        tr:hover {
+            background: #444;
+        }
+
+        img {
+            width: 100px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+        <h1 style="text-align:center;">ประวัติการซื้อบัตรของฉัน</h1>
+
+        <% if (tickets.length> 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ภาพงาน</th>
+                        <th>ชื่ออีเวนต์</th>
+                        <th>โซน</th>
+                        <th>ที่นั่ง</th>
+                        <th>จำนวน</th>
+                        <th>ยอดรวม</th>
+                        <th>วันที่จอง</th>
+                        <th>สถานะ</th>
+                        <th>แสดงตั๋ว</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% tickets.forEach(ticket=> { %>
+                        <tr>
+                            <td>
+                                <% if (ticket.event && ticket.event.image) { %>
+                                    <img src="<%= ticket.event.image %>" alt="<%= ticket.event.name %>">
+                                    <% } else { %>
+                                        -
+                                        <% } %>
+                            </td>
+                            <td>
+                                <%= ticket.event ? ticket.event.name : '-' %>
+                            </td>
+                            <td>
+                                <%= ticket.zone %>
+                            </td>
+                            <td>
+                                <%= ticket.seats.join(', ') %></td>
+            <td><%= ticket.seats.length %></td>
+            <td><%= ticket.totalPrice.toLocaleString() %> บาท</td>
+            <td><%= new Date(ticket.bookedAt).toLocaleString() %></td>
+            <td><%= ticket.status %></td>
+            <!-- ปุ่ม QR ตั๋ว -->
+            <td><button onclick="showQR(' <%=ticket.qrCode %>')">QR Code</button></td>
+                   
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p style="text-align:center;">คุณยังไม่มีประวัติการซื้อบัตร</p>
+  <% } %>
+    <div id="qrModal"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center;">
+        <div style="background:#fff; padding:20px; border-radius:10px; text-align:center;">
+            <h3>QR Code สำหรับตั๋ว</h3>
+            <img id="qrImage" src="" style="width:200px; height:200px;">
+            <br><br>
+            <button onclick="closeQR()">ปิด</button>
+        </div>
+    </div>
+    <%- include('../partials/footer') %>
+    <script>
+        function showQR(src) {
+            document.getElementById('qrImage').src = src;
+            document.getElementById('qrModal').style.display = 'flex';
+        }
+        function closeQR() {
+            document.getElementById('qrModal').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

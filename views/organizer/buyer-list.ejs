@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>รายชื่อผู้ซื้อบัตร</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        table {
+            width: 90%;
+            margin: 2rem auto;
+            border-collapse: collapse;
+            background: #333;
+            color: #fff;
+            border-radius: 8px;
+            overflow: auto;
+        }
+
+        th,
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #444;
+            text-align: left;
+        }
+
+        th {
+            background: #222;
+        }
+
+        tr:hover {
+            background: #444;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+        <div class="backBtn">
+            <button onclick="window.location.href='/organizer/dashboard'"> &larr; กลับ</button>
+        </div>
+        <h1>รายชื่อผู้ซื้อบัตรของ <%= event.name %>
+        </h1>
+        
+        <div class="container">
+            <% if (buyers.length> 0) { %>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ลำดับ</th>
+                            <th>ชื่อผู้ซื้อ</th>
+                            <th>โซน</th>
+                            <th>ที่นั่ง</th>
+                            <th>จำนวน</th>
+                            <th>ราคารวม (บาท)</th>
+                            <th>วันที่ & เวลา</th>
+                            <th>สถานะ</th>
+                            <th>อีเมล</th>
+                            <th>เบอร์โทร</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% buyers.forEach((b, i)=> { %>
+                            <tr>
+                                <td>
+                                    <%= i + 1 %>
+                                </td>
+                                <td>
+                                    <%= b.firstName %>
+                                        <%= b.lastName %>
+                                </td>
+                                <td>
+                                    <%= b.zone %>
+                                </td>
+                                <td>
+                                    <%= b.seats.join(', ') %></td>
+                            <td><%= b.quantity %></td>
+                            <td><%= b.totalPrice.toLocaleString() %></td>
+                            <td><%= new Date(b.purchaseDate).toLocaleString('th-TH', { dateStyle: 'short' ,
+                                        timeStyle: 'short' }) %>
+                                </td>
+                                <td>
+                                    <%= b.status %>
+                                </td>
+                                <td>
+                                    <%= b.email %>
+                                </td>
+                                <td>
+                                    <%= b.tel %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                    </tbody>
+                </table>
+                <% } else { %>
+                    <p>ยังไม่มีผู้ซื้อบัตรสำหรับอีเวนต์นี้</p>
+                    <% } %>
+        </div>
+</body>
+
+</html>

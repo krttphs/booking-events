@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>เติม Coin</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 80%;
+            max-height: fit-content;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        #coinDisplay {
+            font-weight: bold;
+            color: #ff9800;
+        }
+
+        .coin-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .addCoinBtn {
+            padding: 10px 20px;
+            width: 20%;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 40px;
+            transition: background 0.2s;
+        }
+
+        .addCoinBtn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+    <div class="container">
+        <h2>เติม Coin</h2>
+        <p>Coin ปัจจุบันของคุณ: <span id="coinDisplay"><%= user.coin %></span></p>
+
+        <div class="coin-buttons">
+            <button class="addCoinBtn" data-amount="100">+100</button>
+            <button class="addCoinBtn" data-amount="500">+500</button>
+            <button class="addCoinBtn" data-amount="1000">+1000</button>
+            <button class="addCoinBtn" data-amount="2000">+2000</button>
+        </div>
+    </div>
+    <script>
+        document.querySelectorAll('.addCoinBtn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const amount = btn.dataset.amount;
+
+                const res = await fetch('/coin/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    document.getElementById('coinDisplay').textContent = data.coins;
+                } else {
+                    alert(data.message || 'เกิดข้อผิดพลาด');
+                }
+            });
+        });
+    </script>
+
+    <%- include('../partials/footer') %>
+</body>
+
+</html>
