@@ -145,9 +145,6 @@ exports.getBookingHistory = async (req, res) => {
 /*---------UPDATE TICKET-------*/
 exports.getEventTicket = async (req, res) => {
     try {
-        if (!req.session.user) {
-            return res.redirect('/auth/login');
-        }
         const ticket = await Booking.findById(req.params.id)
             .populate('event', 'name date location image');
         if (!ticket) return res.status(404).send('ไม่พบตั๋ว');
